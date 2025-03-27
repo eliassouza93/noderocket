@@ -7,7 +7,7 @@ const server = http.createServer((req, res) => {
     const { method, url } = req
 
     if (method == 'GET' && url == '/users') {
-        return res.end('listagem de usuários')
+        return res.end(JSON.stringify(users))
     }
     if (method == 'POST' && url == '/users') {
         users.push({
