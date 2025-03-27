@@ -6,10 +6,12 @@ const users = []
 const server = http.createServer((req, res) => {
     const { method, url } = req
 
-    if (method == 'GET' && url == '/users') {
+    if (method === 'GET' && url === '/users') {
+        res.setHeader('Content-type', 'application/json')
         return res.end(JSON.stringify(users))
     }
-    if (method == 'POST' && url == '/users') {
+
+    if (method === 'POST' && url === '/users') {
         users.push({
             id: 1,
             nome: 'Jhon',
