@@ -10,11 +10,11 @@ const server = http.createServer((req, res) => {
   req.on('end', () => {
     console.log('Body:', body);
     res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Server received the data!');
+    res.end('fake http iniciado!');
   });
 });
 
-const port = 3334;
+const port = 3332;
 
 server.listen(port, () => {
   console.log(`Server listening on port ${port}`);
@@ -27,7 +27,7 @@ class OneToHundredStream extends Readable {
     const i = this.index++;
 
     setTimeout(() => {
-      if (i > 100) {
+      if (i > 10) {
         this.push(null);
       } else {
         const buf = Buffer.from(String(i));
@@ -37,11 +37,15 @@ class OneToHundredStream extends Readable {
   }
 }
 
-fetch('http://localhost:3334', {
+fetch('http://localhost:3332', {
   method: 'POST',
   body: new OneToHundredStream(),
   duplex: 'half',
-})
-  .catch((error) => {
-    console.error('Fetch failed:', error);
-  });
+}).then(response => {
+  return response.text()
+}).then(data => {
+  console.log(data)
+}) 
+
+
+
