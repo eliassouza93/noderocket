@@ -1,10 +1,8 @@
 import http from 'node:http'
-import {randomUUID} from 'node:crypto'
 import { json } from './middlewares/json.js'
-import { Database } from './database.js'
+import { routes } from './routes.js'
+import { extractQueryParams } from './utils/extract-query-parms.js'
 
-
-const database = new Database()
 
 const users = []
 
@@ -13,39 +11,24 @@ const server = http.createServer(async (req, res) => {
 
     await json(req, res)
 
-    console.log('Corpo da requisição:', req.body);  //corpo da req
+    const route = routes.find(route => {
+        return route.method === method && route.path.test(url)
+    })
 
-    if (method === 'GET' && url === '/users') {
-        const users = database.select('users')
+    if (route) {
+        const routeParams = req.url.match(route.path)
 
-        return res
-            .end(JSON.stringify(users))
-    }
+        const { query, ...parms } = routeParams.groups
 
-    if (method === 'POST' && url === '/users') {
-        const { name, email } = req.body || {}
+        req.parms = parms
+        req.query = query ? extractQueryParams(query) :{}
 
-        console.log('Nome:', name)
-        console.log('Email:', email)
-
-        if (!name || !email) {
-            return res.writeHead(400).end('Nome e email são obrigatórios')
-        }
-
-        const user = {
-            id: randomUUID(),
-            name,
-            email
-        }
-
-        users.push(user)
-        database.insert('users', user)
-
-        return res.writeHead(201).end('Usuário criado com sucesso')
+        return route.handler(req, res)
     }
 
     return res.writeHead(404).end('Not Found')
 })
+
 
 server.listen(3333, () => {
     console.log('Servidor rodando na porta 3333')

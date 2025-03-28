@@ -38,5 +38,21 @@ export class Database {
         return data;
 
     }
+    update(table, id, data) {
+        const rouIndex = this.database[table].findIndex(row => row.id === id)
+        if (rouIndex > -1) {
+            this.database[table][rouIndex] = { id, ...data }
+            this.persiste()
+        }
+
+    }
+    delete(table, id) {
+        const rouIndex = this.database[table].findIndex(row => row.id === id)
+        if (rouIndex > -1) {
+            this.database[table].splice(rouIndex, 1)
+            this.persiste()
+        }
+
+    }
 
 }

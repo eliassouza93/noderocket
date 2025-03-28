@@ -1,4 +1,0 @@
-
-
-req => ReadableStream
-res => WritableStream
