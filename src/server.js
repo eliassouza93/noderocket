@@ -1,38 +1,44 @@
 import http from 'node:http'
+import { json } from './middlewares/json.js'
 
 const users = []
 
-const server = http.createServer(async(req, res) => {
+const server = http.createServer(async (req, res) => {
     const { method, url } = req
 
-    const buffers = []
+    await json(req, res)
 
-    for await (const chunk of req) {
-        buffers.push(chunk)
-    }
-
-    const body =  Buffer.concat(buffers).toString() 
-
-    console.log(body  || 'nome não encontrado')
+    console.log('Corpo da requisição:', req.body);  //corpo da req
 
     if (method === 'GET' && url === '/users') {
         return res
-            .setHeader('Content-Type', 'application/json')
             .end(JSON.stringify(users))
     }
 
     if (method === 'POST' && url === '/users') {
+        const { name, email } = req.body || {}
+
+        console.log('Nome:', name)
+        console.log('Email:', email)
+
+        if (!name || !email) {
+            return res.writeHead(400).end('Nome e email são obrigatórios')
+        }
+
         const user = {
             id: users.length + 1,
-            name: 'Jhon',
-            email: 'Jhon@gmail.com'
+            name,
+            email
         }
+
         users.push(user)
 
-        return res.writeHead(201).end()
+        return res.writeHead(201).end('Usuário criado com sucesso')
     }
 
-    return res.writeHead(404).end('not found')
+    return res.writeHead(404).end('Not Found')
 })
 
-server.listen(3333)
+server.listen(3333, () => {
+    console.log('Servidor rodando na porta 3333')
+})
